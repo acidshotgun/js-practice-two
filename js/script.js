@@ -7,7 +7,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // - Ф-я которая изначально скрывает все табы
     function hideTabContent() {
         tabsContent.forEach(item => {
-            item.style.display = 'none';
+            item.classList.add('hide');
+            item.classList.remove('show', 'fade');
         });
         // - Убираем активность у имени табов 
         tabs.forEach(item => {
@@ -18,7 +19,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // - Ф-я показа табов (изначально первого) (i = 0 это по умолчанию)
     // - Показывает сам таб блок и активность в списке
     function showTabContent(i = 0) {
-        tabsContent[i].style.display = 'block';
+        tabsContent[i].classList.add('show', 'fade');
+        tabsContent[i].classList.remove('hide');
         tabs[i].classList.add('tabheader__item_active');
     }
 
