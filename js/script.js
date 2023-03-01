@@ -1,5 +1,7 @@
 window.addEventListener('DOMContentLoaded', () => {
 
+    // Tabs
+
     const tabs = document.querySelectorAll('.tabheader__item'), // - табы (именования табов таблица)
           tabsContent = document.querySelectorAll('.tabcontent'), // - сами табы с контентом
           tabsParent = document.querySelector('.tabheader__items'); // - окно с табами
@@ -50,4 +52,55 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    // Timer
+
+    const deadline = '2023-03-11'; // - это дедлайн
+
+    // Это ф-я которая будет получать и обрабатывать разницу между дедлайном и нынешней датой
+    function getTimeRemaining(endtime) {
+        const t = Date.parse(endtime) - Date.parse(new Date()),
+              days = Math.floor(t / (1000 * 60 * 60 * 24)),
+              hours = Math.floor((t / (1000 * 60 * 60) % 24)),
+              minutes = Math.floor((t / 1000 / 60) % 60),
+              seconds = Math.floor((t / 1000) % 60);
+
+        // Возвращаем полученные даты
+        return {
+            'total': t,
+            'days': days,
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds
+        };
+    }
+
+    // Это ф - я установки таймера где в переменные мы получаем DOM - элементы для дат
+    // Аргументы это сам селектор .timer в верстке и дедлайн
+    function setClock(selector, endtime) {
+        const timer = document.querySelector(selector),
+              days = timer.querySelector('#days'),
+              hours = timer.querySelector('#hours'),
+              minutes = timer.querySelector('#minutes'),
+              seconds = timer.querySelector('#seconds'),
+              timeInterval = setInterval(updateClock, 1000);
+
+        // СРазу вызываем ф-ю чтобы таймер обновлялся моментально без загрузки
+        updateClock();
+
+        // Ф-я обновления таймера - подставляет нужное нам время под таймер
+        // Внутри вызываем ф-ю getTimeRemaining() для которой аргумент это дэдлайн
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
+
+            // В переменной t будет объект который возвращает ф-я getTimeRemaining()
+            // И через t мы получаем доступ к дням часам и тд
+            days.innerHTML = t.days;
+            hours.innerHTML = t.hours;
+            minutes.innerHTML = t.minutes;
+            seconds.innerHTML = t.seconds;
+        }
+    }
+
+    setClock('.timer', deadline);
 });
