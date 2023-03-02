@@ -126,6 +126,64 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
+    
     setClock('.timer', deadline);
+
+    // Modal
+    // Я
+    // const btnModal = document.querySelectorAll('[data-modal]'),
+    //       btnModalClose = document.querySelector('[data-close]'),
+    //       windowModal = document.querySelector('.modal');
+
+    // btnModal.forEach(item => {
+    //     item.addEventListener('click', () => {
+    //         windowModal.classList.remove('hide');
+    //         windowModal.classList.add('show', 'fade');
+    //     });
+    // });
+
+    // btnModalClose.addEventListener('click', () => {
+    //     windowModal.classList.remove('show', 'fade');
+    //     windowModal.classList.add('hide');
+    // });
+
+    // Ваня
+    const modalTrigger = document.querySelectorAll('[data-modal]'),
+          modal = document.querySelector('.modal'),
+          modalCloseBtn = document.querySelector('[data-close]');
+
+    modalTrigger.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.add('show', 'fade');
+            modal.classList.remove('hide');
+            // modal.classList.toggle('show');
+            // Убрать скролл когда modal block
+            document.body.style.overflow = 'hidden';
+        });
+    });
+
+    // Ф-я закрывает modal окно при вызовах
+    function closeModal() {
+        modal.classList.add('hide');
+        modal.classList.remove('show', 'fade');
+        // Вернуть скролл когда modal none
+        document.body.style.overflow = 'scroll';
+    }
+    
+    modalCloseBtn.addEventListener('click', closeModal); // - передаем ф-ю но не вызваем
+
+    modal.addEventListener('click', (event) => {
+        // Если таргет на modal (это внешняя щасть модального окна), то мы его закрываем
+        if (event.target === modal) {
+            closeModal(); // - вызываем если срабатывает условие
+        }
+    });
+
+    // Закрыть modal при нажатии ESC вешается на документ событие code (event.code)
+    document.addEventListener('keydown', (event) => {
+        // Проверяется что кнопка нажата именно в момент когда открыто modal с помощью contains()
+        if (event.code === 'Escape' && modal.classList.contains('show')) {
+            closeModal();
+        }
+    });
 });
