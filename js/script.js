@@ -130,24 +130,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setClock('.timer', deadline);
 
     // Modal
-    // Я
-    // const btnModal = document.querySelectorAll('[data-modal]'),
-    //       btnModalClose = document.querySelector('[data-close]'),
-    //       windowModal = document.querySelector('.modal');
-
-    // btnModal.forEach(item => {
-    //     item.addEventListener('click', () => {
-    //         windowModal.classList.remove('hide');
-    //         windowModal.classList.add('show', 'fade');
-    //     });
-    // });
-
-    // btnModalClose.addEventListener('click', () => {
-    //     windowModal.classList.remove('show', 'fade');
-    //     windowModal.classList.add('hide');
-    // });
-
-    // Ваня
+    
     const modalTrigger = document.querySelectorAll('[data-modal]'),
           modal = document.querySelector('.modal'),
           modalCloseBtn = document.querySelector('[data-close]');
@@ -186,4 +169,5 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
+    
 });
