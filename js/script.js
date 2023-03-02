@@ -1,5 +1,6 @@
 window.addEventListener('DOMContentLoaded', () => {
 
+
     // Tabs
 
     const tabs = document.querySelectorAll('.tabheader__item'), // - табы (именования табов таблица)
@@ -52,6 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
 
     // Timer
 
@@ -129,22 +131,29 @@ window.addEventListener('DOMContentLoaded', () => {
     
     setClock('.timer', deadline);
 
+
     // Modal
     
     const modalTrigger = document.querySelectorAll('[data-modal]'),
           modal = document.querySelector('.modal'),
           modalCloseBtn = document.querySelector('[data-close]');
 
-    modalTrigger.forEach(btn => {
-        btn.addEventListener('click', () => {
-            modal.classList.add('show', 'fade');
-            modal.classList.remove('hide');
-            // modal.classList.toggle('show');
-            // Убрать скролл когда modal block
-            document.body.style.overflow = 'hidden';
-        });
-    });
 
+    // Ф-я открывает modal окно при вызове
+    function openModal() {
+        modal.classList.add('show', 'fade');
+        modal.classList.remove('hide');
+        // modal.classList.toggle('show');
+        // Убрать скролл когда modal block
+        document.body.style.overflow = 'hidden';
+        // Открыв modal сам он не вылезет. Уберем таймер
+        clearInterval(modalTimerId);
+    }
+
+    modalTrigger.forEach(btn => {
+        btn.addEventListener('click', openModal);
+    });
+    
     // Ф-я закрывает modal окно при вызовах
     function closeModal() {
         modal.classList.add('hide');
@@ -169,5 +178,17 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }
     });
-    
+
+    const modalTimerId = setTimeout(openModal, 30000);
+
+    // Вызов modal окна при скролле в конец страницы
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
+            openModal();
+            // Удаляем слушатель после первого вызова по скроллу
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll);
 });
