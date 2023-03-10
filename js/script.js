@@ -191,4 +191,85 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('scroll', showModalByScroll);
+
+
+    // Classes for tabs
+    // Идея - шаблонизировать карточки и создавать их передвая нужные аргументы
+
+    // Как создать класс карточки?
+    // 1) src - путь к изображению, 2) Текст если картинка поламалась, 3) Title, 4) Descr, 5) Price
+    // Эти св-ва задаются в кач-ве аргумента в конструктор
+    // parentSelector это передваемый контейнер где будут наши элементы
+    class MenuCard {
+        constructor(src, alt, title, descr, price, parentSelector) {
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.parent = document.querySelector(parentSelector);
+            this.transfer = 27;
+            this.changeToUAH();
+        }
+
+        // Далее создаем методы и первый метот смена курса валют будет вызваться прямо в конструкторе
+        changeToUAH() {
+            this.price = this.price * this.transfer;
+        }
+
+        // Метод render. Нужно создать элемент и поместить его в верстку. Верстку дополнить данными - аргументами
+        // И поместить элемент на страницу
+        render() {
+         // Тут мы создаем элемент и помещаем его в переменную element (этот элемент будет помещен в контейнер в html)
+            const element = document.createElement('div');
+            // Помещаем в element содержимое которое будет рендерится в нашей верстке
+            element.innerHTML = `
+                <div class="menu__item">
+                    <img src=${this.src} alt=${this.alt}>
+                    <h3 class="menu__item-subtitle">${this.title}</h3>
+                    <div class="menu__item-descr">${this.descr}</div>
+                    <div class="menu__item-divider"></div>
+                    <div class="menu__item-price">
+                        <div class="menu__item-cost">Цена:</div>
+                        <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                    </div>
+                </div>
+            `;
+
+            // Ранее мы создали переменную parent в классе
+            // В него мы передаем в данном случае контейнер, в который будем помещать созданные элементы
+            this.parent.append(element);
+        }
+    }
+
+    // Далее просто создаем объекты из класса задавая аргументы для конструктора
+    // Можно записывать const menuCard = MenuTab(аргументы)
+    // Но мы используем кроткий синтаксис где переменнты не будут хранится а просто потеряются
+    // И сразу вызываем на нем наш метод render() который и будет генерировать табы
+    new MenuCard(
+        'img/tabs/vegy.jpg',
+        'vegy',
+        'Меню "Фитнес"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        9,
+        '.menu .container'
+    ).render();
+
+    new MenuCard(
+        'img/tabs/elite.jpg',
+        'elite',
+        'Меню “Премиум”',
+        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
+        20,
+        '.menu .container'
+    ).render();
+
+    new MenuCard(
+        'img/tabs/post.jpg',
+        'post',
+        'Меню "Постное"',
+        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
+        15,
+        '.menu .container'
+    ).render();
 });
