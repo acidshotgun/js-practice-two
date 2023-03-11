@@ -200,14 +200,17 @@ window.addEventListener('DOMContentLoaded', () => {
     // 1) src - путь к изображению, 2) Текст если картинка поламалась, 3) Title, 4) Descr, 5) Price
     // Эти св-ва задаются в кач-ве аргумента в конструктор
     // parentSelector это передваемый контейнер где будут наши элементы
+
+    // Посколько мы можем добавлять множество классов мы воспользуемся оператором rest(...classes)
     class MenuCard {
-        constructor(src, alt, title, descr, price, parentSelector) {
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
             this.src = src;
             this.alt = alt;
             this.title = title;
             this.descr = descr;
             this.price = price;
             this.parent = document.querySelector(parentSelector);
+            this.classes = classes;
             this.transfer = 27;
             this.changeToUAH();
         }
@@ -222,17 +225,23 @@ window.addEventListener('DOMContentLoaded', () => {
         render() {
          // Тут мы создаем элемент и помещаем его в переменную element (этот элемент будет помещен в контейнер в html)
             const element = document.createElement('div');
+            // Если в оператор rest ничего не передается мы присваиваем значение по умолчанию
+            if (this.classes.length === 0) {
+                this.element = 'menu__item';
+                element.classList.add(this.element);
+            } else {
+                // Тк rest дает нам массив то мы перебираем его и присваиваем element класс который получим в className
+                this.classes.forEach(className => element.classList.add(className));
+            }
             // Помещаем в element содержимое которое будет рендерится в нашей верстке
             element.innerHTML = `
-                <div class="menu__item">
-                    <img src=${this.src} alt=${this.alt}>
-                    <h3 class="menu__item-subtitle">${this.title}</h3>
-                    <div class="menu__item-descr">${this.descr}</div>
-                    <div class="menu__item-divider"></div>
-                    <div class="menu__item-price">
-                        <div class="menu__item-cost">Цена:</div>
-                        <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
-                    </div>
+                <img src=${this.src} alt=${this.alt}>
+                <h3 class="menu__item-subtitle">${this.title}</h3>
+                <div class="menu__item-descr">${this.descr}</div>
+                <div class="menu__item-divider"></div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                 </div>
             `;
 
@@ -252,7 +261,9 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню "Фитнес"',
         'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
         9,
-        '.menu .container'
+        '.menu .container',
+        // Ниже ...rest
+        'menu__item'
     ).render();
 
     new MenuCard(
@@ -261,7 +272,8 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню “Премиум”',
         'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
         20,
-        '.menu .container'
+        '.menu .container',
+        'menu__item'
     ).render();
 
     new MenuCard(
@@ -270,6 +282,7 @@ window.addEventListener('DOMContentLoaded', () => {
         'Меню "Постное"',
         'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
         15,
-        '.menu .container'
+        '.menu .container',
+        'menu__item'
     ).render();
 });
