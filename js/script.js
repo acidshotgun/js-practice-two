@@ -227,7 +227,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const element = document.createElement('div');
             // Если в оператор rest ничего не передается мы присваиваем значение по умолчанию
             if (this.classes.length === 0) {
-                this.element = 'menu__item';
+                this.classes = 'menu__item';
                 element.classList.add(this.element);
             } else {
                 // Тк rest дает нам массив то мы перебираем его и присваиваем element класс который получим в className
