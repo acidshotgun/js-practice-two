@@ -135,8 +135,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // Modal
     
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-          modal = document.querySelector('.modal'),
-          modalCloseBtn = document.querySelector('[data-close]');
+          modal = document.querySelector('.modal');
 
 
     // Ф-я открывает modal окно при вызове
@@ -162,11 +161,12 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'scroll';
     }
     
-    modalCloseBtn.addEventListener('click', closeModal); // - передаем ф-ю но не вызваем
 
     modal.addEventListener('click', (event) => {
-        // Если таргет на modal (это внешняя щасть модального окна), то мы его закрываем
-        if (event.target === modal) {
+        // Если таргет на modal (это внешняя щасть модального окна), или это крестик (data-close) то мы его закрываем
+        // data-close - это атрибут который мы указали в инлайне этому блоку
+        // Так ф-я будет работать на всех крестиках где есть этот дата-атрибут
+        if (event.target === modal || event.target.getAttribute('data-close') == '') {
             closeModal(); // - вызываем если срабатывает условие
         }
     });
@@ -179,7 +179,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 30000);
+    const modalTimerId = setTimeout(openModal, 50000);
 
     // Вызов modal окна при скролле в конец страницы
     function showModalByScroll() {
@@ -293,7 +293,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Объект сообщений для различных исходов для запроса
     const message = {
-        loading: 'Загрузка',
+        loading: 'img/form/005spinner.svg',
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...',
     };
@@ -310,12 +310,17 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            // Создаем блок статуса нашего запроса используя объект message
-            const statusMessage = document.createElement('div');
-            statusMessage.classList.add('status');
-            statusMessage.textContent = message.loading;
+            // Создаем блок статуса нашего запроса используя объект img
+            // Это спиннер загрузки который видно на медленном интернете
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
             // Добавляем это сообщение к форме (сообщение будет там)
-            form.append(statusMessage);
+              // С помощью метода insertAdjacentElement()
+            form.insertAdjacentElement('afterend', statusMessage);
 
             // Создаем объект запроса и настраиваем (есть в репозитории learning)
             const request = new XMLHttpRequest();
@@ -347,15 +352,49 @@ window.addEventListener('DOMContentLoaded', () => {
             request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    statusMessage.textContent = message.success;
+                    showThanksModal(message.success);
                     form.reset();
-                    setTimeout(() => {
-                        statusMessage.remove();
-                    }, 2000);
+                    statusMessage.remove();
                 } else {
-                    statusMessage.textContent = message.failure;
+                    showThanksModal(message.failure);
                 }
             });
         });
+    }
+
+    // Ф-я будет изменять благодарственное окно после отправки данных
+    // В зависимости от статуса запроса
+    // Соответственно аргументом будет сообщение со статусом
+    function showThanksModal(message) {
+        // получаем само модальное окно
+        const prevModalDialog = document.querySelector('.modal__dialog');
+
+        // Скрывем блок отправки данных добавив класс
+        prevModalDialog.classList.add('hide');
+        // Теперь мы вызываем структуру модального окна
+        // И формируем внутри структуру с благодарностью после отправки данных
+        openModal();
+
+        // Сама структура и ее содержание
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+            <div class='modal__content'>
+                <div class='modal__close' data-close>×</div>
+                <div class='modal__title'>${message}</div>
+            </div>
+        `;
+
+        // Тут без создания переменной сразу помещаем в .modal новый контент с созданой благодарностью
+        document.querySelector('.modal').append(thanksModal);
+
+        // Тут мы через 4 секунды убираем благодарственное окно и возвращаем блок заполнения
+        // На тот случай если потребуется отправить заявку еще раз
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add('show');
+            prevModalDialog.classList.remove('hide');
+            closeModal();
+        }, 4000);
     }
 });
