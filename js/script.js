@@ -57,7 +57,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Timer
 
-    const deadline = '2023-03-11'; // - это дедлайн
+    const deadline = '2023-04-11'; // - это дедлайн
 
     // Это ф-я которая будет получать и обрабатывать разницу между дедлайном и нынешней датой
     function getTimeRemaining(endtime) {
@@ -285,4 +285,77 @@ window.addEventListener('DOMContentLoaded', () => {
         '.menu .container',
         'menu__item'
     ).render();
+
+
+    // Forms
+//!!!!!
+    const forms = document.querySelectorAll('form');
+
+    // Объект сообщений для различных исходов для запроса
+    const message = {
+        loading: 'Загрузка',
+        success: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'Что-то пошло не так...',
+    };
+
+    // Вешаем обработчик submit на каждую форму их две
+    // Через ф-ю. Она будет вешать обработчик на формы
+    // Просто вызвав ф-ю postData() на каждую форму
+    forms.forEach(item => {
+        postData(item);
+    });
+
+    // Ф-я которая будет постить данные с событием 'submit - отправить'
+    function postData(form) {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Создаем блок статуса нашего запроса используя объект message
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            // Добавляем это сообщение к форме (сообщение будет там)
+            form.append(statusMessage);
+
+            // Создаем объект запроса и настраиваем (есть в репозитории learning)
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            // Указываем что будет приходить серверу (заголовок)
+            request.setRequestHeader('Content-type', 'application/json');
+
+            // Создаем объект, который будет формировать все заполненые данные с формы
+            // Ключ - значение. Принимает в себя аргумент функции postData()
+            // Главное чтобы отправка сработала нужно в inline input в htlm указать атрибут name="something"
+            const formData = new FormData(form);
+
+            // Тут мы должны превратить  formData в JSON формат, чего напрямую сделать не можем
+            // Для этого мы создадим пустой объект и запишим туда св-ва reuest'а, а объект сделаем формата JSON
+            const object = {};
+            formData.forEach((value, key) => {
+                object[key] = value;
+            });
+
+            // Теперь делаем из object объект JSON
+            const json = JSON.stringify(object);
+
+            // Отправляем данные. Указываем тело, тк отправляем что-то сервер
+            request.send(json);
+
+            // Обработчиком отслеживаем load - конечную загрузку (состояние readyState)
+            // И показываем сообщение в записимости от результата
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
 });
