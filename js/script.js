@@ -318,17 +318,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 display: block;
                 margin: 0 auto;
             `;
-            // Добавляем это сообщение к форме (сообщение будет там)
+            // Добавляем это сообщение к форме (сообщение будет там внутри)
               // С помощью метода insertAdjacentElement()
             form.insertAdjacentElement('afterend', statusMessage);
 
-            // Создаем объект запроса и настраиваем (есть в репозитории learning)
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-
-            // Указываем что будет приходить серверу (заголовок)
-            request.setRequestHeader('Content-type', 'application/json');
-
+   
             // Создаем объект, который будет формировать все заполненые данные с формы
             // Ключ - значение. Принимает в себя аргумент функции postData()
             // Главное чтобы отправка сработала нужно в inline input в htlm указать атрибут name="something"
@@ -341,24 +335,26 @@ window.addEventListener('DOMContentLoaded', () => {
                 object[key] = value;
             });
 
-            // Теперь делаем из object объект JSON
-            const json = JSON.stringify(object);
-
-            // Отправляем данные. Указываем тело, тк отправляем что-то сервер
-            request.send(json);
-
-            // Обработчиком отслеживаем load - конечную загрузку (состояние readyState)
-            // И показываем сообщение в записимости от результата
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(message.success);
-                    form.reset();
-                    statusMessage.remove();
-                } else {
-                    showThanksModal(message.failure);
-                }
-            });
+            // Создаем объект запроса(промис) и настраиваем (есть в репозитории learning)
+            fetch('server.php', {
+                method: 'POST',
+                headers: {'Content-type': 'application/json'},
+                body: JSON.stringify(object),
+            })
+            // Делаем из JSON текст формат
+            .then(data => data.text())
+            // Код выполняющийся при успешном запросе
+            // Показывает благодарность и убирает спинер загрузки
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.success);
+                statusMessage.remove();
+                // catch() сработает если что то пошло не так
+                // Выдаст окно с ошибкой
+            }).catch(() => {
+                showThanksModal(message.failure);
+                // При любом исходе формы очистятся
+            }).finally(form.reset());
         });
     }
 
@@ -398,3 +394,5 @@ window.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
 });
+
+
