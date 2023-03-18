@@ -393,6 +393,12 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 4000);
     }
+
+
+    fetch('shttp://localhost:3000/menu')
+    .then(data => data.json())
+    .then(result => console.log(result));
 });
 
 
+ 
