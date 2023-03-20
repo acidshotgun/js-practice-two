@@ -251,40 +251,27 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Далее просто создаем объекты из класса задавая аргументы для конструктора
-    // Можно записывать const menuCard = MenuTab(аргументы)
-    // Но мы используем кроткий синтаксис где переменнты не будут хранится а просто потеряются
-    // И сразу вызываем на нем наш метод render() который и будет генерировать табы
-    new MenuCard(
-        'img/tabs/vegy.jpg',
-        'vegy',
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        '.menu .container',
-        // Ниже ...rest
-        'menu__item'
-    ).render();
+    // Создаем функцию которая будет получать с сервера данные для создания карточек
+    const getResource = async (url) => {
+        const res = await fetch(url);
 
-    new MenuCard(
-        'img/tabs/elite.jpg',
-        'elite',
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        20,
-        '.menu .container',
-        'menu__item'
-    ).render();
+        return await res.json();
+    };
 
-    new MenuCard(
-        'img/tabs/post.jpg',
-        'post',
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        15,
-        '.menu .container',
-        'menu__item'
-    ).render();
+    // Вызываем функцию, где аргументом будет ссылка на массив с карточками в базе данных
+    getResource('http://localhost:3000/menu')
+    // Обрабатываем полож исход
+    .then(data => {
+        // Тк в бд это массив беребираем его. Аргумент это объекты в массиве (деструктуризация)
+        // И на их основе создается новый объект от класса с аргументами
+        // Затем render() будет генерировать верстку табов на сайте
+        data.forEach(({img, altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
+        });
+    });
+
+    // Этот подход избавил нас от создания этих карточек тут вручную
+    // И теперь они создлаются на основании данных с базы данных
 
 
     // Forms
@@ -302,11 +289,22 @@ window.addEventListener('DOMContentLoaded', () => {
     // Через ф-ю. Она будет вешать обработчик на формы
     // Просто вызвав ф-ю postData() на каждую форму
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
+    //!Комментарии!
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-type': 'application/json'},
+                body: data,
+        });
+
+        return await res.json();
+    };
+
     // Ф-я которая будет постить данные с событием 'submit - отправить'
-    function postData(form) {
+    function bindPostData(form) {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
 
@@ -328,21 +326,15 @@ window.addEventListener('DOMContentLoaded', () => {
             // Главное чтобы отправка сработала нужно в inline input в htlm указать атрибут name="something"
             const formData = new FormData(form);
 
-            // Тут мы должны превратить  formData в JSON формат, чего напрямую сделать не можем
-            // Для этого мы создадим пустой объект и запишим туда св-ва reuest'а, а объект сделаем формата JSON
-            const object = {};
-            formData.forEach((value, key) => {
-                object[key] = value;
-            });
+            // Тут мы должны превратить  formData в JSON формат, чего напрямую сделать не можем, его нужно "пересоздать"
+            // Для этого мы создадим переменную и поместим в нее JSON - объект
+            // Этот объект получился после преобразования formData в массив а потом обратно в объект
+            // Методы Object.entries() и Object.fromEntries()
+            // Этот объект приет ф-я postData в кач-ве аргумента
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            // Создаем объект запроса(промис) и настраиваем (есть в репозитории learning)
-            fetch('server.php', {
-                method: 'POST',
-                headers: {'Content-type': 'application/json'},
-                body: JSON.stringify(object),
-            })
-            // Делаем из JSON текст формат
-            .then(data => data.text())
+            postData('http://localhost:3000/requests', json)
+            // Убрали трансформацию JSON в объект тк функция это уже сделала
             // Код выполняющийся при успешном запросе
             // Показывает благодарность и убирает спинер загрузки
             .then(data => {
@@ -393,11 +385,6 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 4000);
     }
-
-
-    fetch('shttp://localhost:3000/menu')
-    .then(data => data.json())
-    .then(result => console.log(result));
 });
 
 
