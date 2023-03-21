@@ -255,20 +255,38 @@ window.addEventListener('DOMContentLoaded', () => {
     const getResource = async (url) => {
         const res = await fetch(url);
 
+        // Поскольку fetch() не обрабатывает ошибки кроме 404 он не активирует catch, поэтому их надо прописать самим
+        // ok - Этот сатус как 200
+        // Если статус не ок, то выкинем ошибку (throw) и пояснение что за ошибка
+        // Создается как объект new и теперь можем получить url и статус ошибки
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status ${res.status}`);
+        }
+
         return await res.json();
     };
 
     // Вызываем функцию, где аргументом будет ссылка на массив с карточками в базе данных
-    getResource('http://localhost:3000/menu')
-    // Обрабатываем полож исход
+    // getResource('http://localhost:3000/menu')
+    // // Обрабатываем полож исход
+    // .then(data => {
+    //     // Тк в бд это массив беребираем его. Аргумент это объекты в массиве (деструктуризация)
+    //     // И на их основе создается новый объект от класса с аргументами
+    //     // Затем render() будет генерировать верстку табов на сайте
+    //     data.forEach(({img, altimg, title, descr, price}) => {
+    //         new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
+    //     });
+    // });
+
+
+    // Вариант создания с помощью axios
+    axios.get('http://localhost:3000/menu')
     .then(data => {
-        // Тк в бд это массив беребираем его. Аргумент это объекты в массиве (деструктуризация)
-        // И на их основе создается новый объект от класса с аргументами
-        // Затем render() будет генерировать верстку табов на сайте
-        data.forEach(({img, altimg, title, descr, price}) => {
+        data.data.forEach(({img, altimg, title, descr, price}) => {
             new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
         });
     });
+    
 
     // Этот подход избавил нас от создания этих карточек тут вручную
     // И теперь они создлаются на основании данных с базы данных
