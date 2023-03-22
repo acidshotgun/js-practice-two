@@ -420,70 +420,110 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Slider
 
+    // В этом сп-е мы создали в обертке еще один блок <div class="offer__slider-inner"></div>
+    // И в него поместили сами слайды
+    // Это делается для того чтобы главная обертка была как окошко
+
+    // Алгоритм
+    //  1) Блоку offer__slider-wrapper(обертка) мы назначим overflow: hidden и все что будет шире - скроется
+    //  2) Блок offer__slider-inner будет в виде карусели и будет занимать ширину равную ширине всех слайдов вместе
+    //      И при нажатии кнопок мы будет не скрывать/показывать а двигать это карусель влево/вправо
+
     const slides = document.querySelectorAll('.offer__slide'),
           prev = document.querySelector('.offer__slider-prev'),
           next = document.querySelector('.offer__slider-next'),
           total = document.querySelector('#total'),
-          current = document.querySelector('#current');
-    // Зн-е первого слайда
+          current = document.querySelector('#current'),
+          slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+          // Это сама карусель
+          slidesField = document.querySelector('.offer__slider-inner'),
+          // Эта переменная нужна чтобы получить ширину самой обертки слайдера которая была задана
+          width = window.getComputedStyle(slidesWrapper).width;
+          
     let slideIndex = 1;
+    
+    // Эта переменная будет показывать на сколько мы отступили вправо/влево при помощи tranform
+    let offset = 0;
 
-    // Вызываем ф-ю чтобы показать первый слайд
-    showSlides(slideIndex);
-
-    // Показываем корректный номер (1) слайда учитывая ноль если число однозначное
-    // total это общее число
     if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
+        current.textContent = `0${slideIndex}`;
     } else {
         total.textContent = slides.length;
+        current.textContent = slideIndex;
     }
 
-    // Ф-я показа слайдов. Аргумент это slideIndex
-    // Создадим условие что если переключаем последний слайд то сдайдер возвращается в начальное положение
-    // И наоборот
-    function showSlides(n) {
-        if (n > slides.length) {
+    // Кстанавливаем ширину карусели по отношению к кол-ву слайдов (кол-во слайдов умножить на 100%)
+    // Те ширина карусели будет равна ширине всех слайдов стоящих подряд в линию
+    // Это css стили там еденицы измерения
+    slidesField.style.width = 100 * slides.length + '%';
+
+    // И чтобы слайды расположить в ряд и сделать плавный переход прописываем нужные стили
+    slidesField.style.display = 'flex';
+    slidesField.style.transition = '0.5s all';
+
+    // Скрываем то что выходит за рамки wrapper
+    slidesWrapper.style.overflow = 'hidden';
+
+    // Тут перебираем все слайды и говорим чтобы все слайды по ширине были равны ширине обертки (width) которую получили
+    // И теперь каждый слайд заполняем весь wrapper
+    slides.forEach(slide => {
+        slide.style.width = width;
+    });
+
+    // Скрпит сдвига по нажатию
+    next.addEventListener('click', () => {
+        // Условие при котором слайдер возвращается на первый слайд
+        // Поскольку в переменной width у нас строка мы удалим две последние буквы и превратим в число с помощьью (+)
+        if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) {
+            offset = 0;
+        } else {
+            // Когда нажимаем стрелку то прибавляется ширина еще одного слайда и все сдвигается влево
+            offset += +width.slice(0, width.length - 2);
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        // Условия при котором счетчик будет возвращаться в положение 1 если next на последнем слайде
+        // И else он просто увеличивается
+        if (slideIndex == slides.length) {
             slideIndex = 1;
+        } else {
+            slideIndex++;
         }
 
-        if (n < 1) {
-            slideIndex = slides.length;
-        }
-
-        // Очищаем все слайды и показываем начальный
-        slides.forEach(item => item.style.display = 'none');
-
-        // Изначально показываем первый слайд
-        slides[slideIndex - 1].style.display = 'block';
-
-        // Тут мы уже показываем номер слайда относительно самой картинки
-        // Повторяя условие что если число меньше 10 то добавится ноль
-        // Если нет то буз нуля
-        // В переменную current записываем это число через textContent
+        // Условия показа 0 при однозначных числах
         if (slides.length < 10) {
             current.textContent = `0${slideIndex}`;
         } else {
             current.textContent = slideIndex;
         }
-    }
-
-    // Это ф-я которая будет переключать слайды
-    // В ее теле мы вызываем ф-ю показа где slideIndex + или - (n) 1
-    // Так он будет переключаться 
-    function plusSlides(n) {
-        showSlides(slideIndex += n);
-    }
-
-    // Вешаем слушатели на стрелки
-    // Они будут вызвать ф-ю переключения слайдеров передавая нужный аргумент
-    // Аргумент это + или - 1
-    prev.addEventListener('click', () => {
-        plusSlides(-1);
     });
 
-    next.addEventListener('click', () => {
-        plusSlides(1);
+    prev.addEventListener('click', () => {
+        // Условие при котором слайдер возвращается на последний слайд
+        // Если мы находимся на первом слайде и жмем кнопку то перемещаемся на последний слайд
+        if (offset == 0) {
+            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+        } else {
+            offset -= +width.slice(0, width.length - 2);
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`;
+
+        // Тут условие если мы находимся на 1 слайде и проматываем влево и попадаем на последний слайд
+        if (slideIndex == 1) {
+            slideIndex = slides.length;
+        } else {
+            slideIndex--;
+        }
+
+        // Условия показа 0 при однозначных числах
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`;
+        } else {
+            current.textContent = slideIndex;
+        }
     });
 });
 
