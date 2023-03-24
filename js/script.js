@@ -543,15 +543,23 @@ window.addEventListener('DOMContentLoaded', () => {
         slidesField.style.transform = `translateX(-${offset}px)`;
     }
 
+    // Ф-я которая внутри с помощью регулярных выражений будет превращать строки типа '100px' в число 100 
+    // Чтобы записать в offset
+    // МОжно так же использовать в будущем но с другими агрументами
+    function deleteNotDigits(str) {
+        return +str.replace(/\D/g, '');
+    }
+
     // Скрпит сдвига по нажатию
     next.addEventListener('click', () => {
         // Условие при котором слайдер возвращается на первый слайд
         // Поскольку в переменной width у нас строка мы удалим две последние буквы и превратим в число с помощьью (+)
-        if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) {
+        // Удалим при помощи регулярных выражений и удалим все не числа и превратим '100px' в число 100 например
+        if (offset == deleteNotDigits(width) * (slides.length - 1)) {
             offset = 0;
         } else {
             // Когда нажимаем стрелку то прибавляется ширина еще одного слайда и все сдвигается влево
-            offset += +width.slice(0, width.length - 2);
+            offset += deleteNotDigits(width);
         }
 
         // Движение блока карусели в сторону на offset пикселей т.е двигается влево на offset px
@@ -574,9 +582,9 @@ window.addEventListener('DOMContentLoaded', () => {
         // Условие при котором слайдер возвращается на последний слайд
         // Если мы находимся на первом слайде и жмем кнопку то перемещаемся на последний слайд
         if (offset == 0) {
-            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+            offset = deleteNotDigits(width) * (slides.length - 1);
         } else {
-            offset -= +width.slice(0, width.length - 2);
+            offset -= deleteNotDigits(width);
         }
 
         // Движение блока карусели в сторону на offset пикселей т.е двигается влево на offset px
@@ -599,7 +607,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const slideTo = e.target.getAttribute('data-slide-to');
 
             slideIndex = slideTo;
-            offset = +width.slice(0, width.length - 2) * (slideTo - 1);
+            offset = deleteNotDigits(width) * (slideTo - 1);
 
             // Движение блока карусели в сторону на offset пикселей т.е двигается влево на offset px
             setTranslateCarousel(offset);
