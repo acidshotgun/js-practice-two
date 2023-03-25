@@ -633,13 +633,52 @@ window.addEventListener('DOMContentLoaded', () => {
     // Результат колорий
     const result = document.querySelector('.calculating__result span');
     // Параметры которые будут меняться
-    // Ставим зн-я sex и  ratio по умолчанию чтобы изначально они как бы ыбли уже нажаты
+    // Ставим зн-я sex и  ratio по умолчанию чтобы изначально они как бы были уже нажаты
     // Иначе девушка с умеренной подвижностью введет только цифровые данные и ничего меняться не будет
         // Там нужно будет еще раз кликать на пол и умеренную активность
-    let sex = 'female',
-        height, weight, age, 
-        ratio = 1.375;
+    let sex, height, weight, age, ratio;
 
+    // Ниже по коду идет запись значений в локальное хранилище
+    // Тут проверим что если эти значения существуют то пусть они будут заполнены
+    if (localStorage.getItem('sex')) {
+        sex = localStorage.getItem('sex');
+    } else {
+        // Если нет то это значение будет по умолчанию
+        sex = 'female';
+        localStorage.setItem('sex', 'female');
+    }
+
+    if (localStorage.getItem('ratio')) {
+        ratio = localStorage.getItem('ratio');
+    } else {
+        // Если нет то это значение будет по умолчанию
+        ratio = 1.375;
+        localStorage.setItem('ratio', 1.375);
+    }
+
+    // Ф-я которая инициализирует калькулятор и при загрузке будет подставлять параметры из localStorage и активность
+    function initLocalSettings(selector, activeClass) {
+        // Получаем элемент из селектора в аргументе (а именно div внутри)
+        const element = document.querySelectorAll(selector);
+
+        // Перебераем каждый элемент и убираем все классы активности
+        element.forEach(elem => {
+            elem.classList.remove(activeClass);
+            // Проверяем если в localStorage есть 'sex' и она равер элементу по id то даем класс актсиновти
+            if (elem.getAttribute('id') === localStorage.getItem('sex')) {
+                elem.classList.add(activeClass);
+            }
+            
+            // Аналогично тут но сравнение по localStorage и data атрибуту
+            if (elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+                elem.classList.add(activeClass);
+            }
+        });
+    }
+
+    // Инициилизируем ф-ю при фходе и обновлении страницы
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
 
     // У нас будет две функции одна будет брать значения из инпутов вторая из блоков с активностью дневной
     
@@ -670,10 +709,12 @@ window.addEventListener('DOMContentLoaded', () => {
     // Теперь ф-ии получения данных
     // Первая ф-я будет получать данные со статического контента, те где просто нужно выбрать суточную активность
     // Аргументы это селектор и класс активности
-    function getStaticInformation(parentSelector, activeClass) {
+    // Одна эта ф-я будет вызываться с аргументами для блока с полом и для блока с активностью отдельно
+    // По аргументами
+    function getStaticInformation(selector, activeClass) {
         // Получаем элементы внутри блока
         // Получаем все div внутри этого родителя
-        const elements = document.querySelectorAll(`${parentSelector} div`);
+        const elements = document.querySelectorAll(selector);
 
         // Перебором вешаем на каждый элемент слушатель
         elements.forEach(elem => {
@@ -681,12 +722,15 @@ window.addEventListener('DOMContentLoaded', () => {
                 // У выбора пола и активности разные атрибуты
                 // Активность имеет дата атрибут а пол id
                 // Тут прописываем условия при клике и получаем разные атрибуты
-                // При клике на активность будем получать значение активности
+                // При клике на активность (у нее атрибут) будем получать значение активности
                 if (event.target.getAttribute('data-ratio')) {
                     ratio = +event.target.getAttribute('data-ratio');
+                    // Так же добавим localStorage чтобы данные запоминались
+                    localStorage.setItem('ratio', +event.target.getAttribute('data-ratio'));
                 } else {
-                    // При клике на пол будем получать в sex пол
+                    // При клике на пол (у него id) будем получать в sex пол
                     sex = event.target.getAttribute('id');
+                    localStorage.setItem('sex', event.target.getAttribute('id'));
                 }
     
                 // Убираем все классы активности которые передаем в функцию
@@ -703,10 +747,12 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Вызываем эту функцию для двух статичных блоков с аргументами (сам блок и класс активности при клике)
-    // 1) Это будет по id gender 2) Это класс активности для выделения (это все в верстке)
-    getStaticInformation('#gender', 'calculating__choose-item_active');
-    getStaticInformation('.calculating__choose_big', 'calculating__choose-item_active');
+    // Вызываем эту функцию для двух статичных блоков по разным аргументам (сам блок в верстке и класс активности при клике)
+    // 1) Это будет по id gender обращаемся к div 2) Это класс активности для выделения (это все в верстке)
+    // Блок с полом
+    getStaticInformation('#gender div', 'calculating__choose-item_active');
+    // Блок с активностью
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
 
 
     // Пишем ф-я которая будет собирать данные с введенных параметров (которые надо вводить)
@@ -717,6 +763,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Обработчик ввода для поля в котором происходит ввод
         input.addEventListener('input', () => {
+
+            // Составляем условие при котором будет проверятся тип вводимых данных при инпуте
+            // Если это не число то будет красная обводка
+            // Если число то обводки нет
+            if (input.value.match(/\D/g)) {
+                input.style.border = '2px solid red';
+            } else {
+                input.style.border = 'none';
+            }
+
             // Чтобы понять какой именно инпут заполняется в данный момент можно использовать switch case
             // В условии мы получаем атрибут выбранного элемента по id и указываем д-я для каждлого условия (инпута)
             switch(input.getAttribute('id')) {
