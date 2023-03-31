@@ -1,4 +1,13 @@
-function slider() {
+// Переданных аргументах у нас будет передаваться объект
+// Этот объект тут и будет деструктуризироваться
+//  container - это весь слайдер целиком (блок)
+//  slide - каждый отдельный слайд(первая строка)
+//  arrow - понятно стрелки
+//  totalCounter - общий счетсчик
+//  currentCounter - текущий слайд
+//  wrapper - это обертка слайдера карусели
+//  field - это сама длинная карусель которая двигается
+function slider({container, slide, nextArrow, prevArrow, totalCounter, correntCounter, wrapper, field}) {
     
     // Slider
 
@@ -11,16 +20,17 @@ function slider() {
     //  2) Блок offer__slider-inner будет в виде карусели и будет занимать ширину равную ширине всех слайдов вместе
     //      И при нажатии кнопок мы будет не скрывать/показывать а двигать это карусель влево/вправо
 
-    const slides = document.querySelectorAll('.offer__slide'),
+    const slides = document.querySelectorAll(slide),
           // Весь блок слайдера с точками и стрелками
-          slider = document.querySelector('.offer__slider'),
-          prev = document.querySelector('.offer__slider-prev'),
-          next = document.querySelector('.offer__slider-next'),
-          total = document.querySelector('#total'),
-          current = document.querySelector('#current'),
-          slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+          slider = document.querySelector(container),
+          prev = document.querySelector(prevArrow),
+          next = document.querySelector(nextArrow),
+          total = document.querySelector(totalCounter),
+          current = document.querySelector(correntCounter),
+          // Обертка карусели
+          slidesWrapper = document.querySelector(wrapper),
           // Это сама карусель
-          slidesField = document.querySelector('.offer__slider-inner'),
+          slidesField = document.querySelector(field),
           // Эта переменная нужна чтобы получить ширину самой обертки слайдера которая была задана
           width = window.getComputedStyle(slidesWrapper).width;
           
@@ -210,4 +220,4 @@ function slider() {
     }
 }
 
-module.exports = slider;
+export default slider;

@@ -1,8 +1,18 @@
-function forms() {
+// Импорт ф-й closeModal() и openModal() чтобы использовать тут в формах
+// Не забываем указать в эти ф-и аргументы. См modal.js
+import { closeModal, openModal } from "./modal";
+// Чтобы модальное окно открывалось и закрывалось
+
+// Импортируем скрипт постинга данных на сервер
+import { postData } from "../services/services";
+
+// Передаем аргументом таймер который берем из script.js
+// Так же аргументом будет селектор формы (передается из главного script.js) на случай если будет несколько селекторов
+function forms(formSelector, modalTimerId) {
 
     // Forms
     //!!!!!
-    const forms = document.querySelectorAll('form');
+    const forms = document.querySelectorAll(formSelector);
 
     // Объект сообщений для различных исходов для запроса
     const message = {
@@ -31,15 +41,7 @@ function forms() {
     // Теперь когда мы получим ответ от сервера await пропустит код дальше чтобы не было ошибки
     // Так же ставим в возврате, тк это тоже промис и он может быть большим
 
-    const postData = async (url, data) => {
-        const res = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-type': 'application/json'},
-                body: data,
-        });
-
-        return await res.json();
-    };
+    //! Ф-Я ПОСТИНГА ДАННЫХ НА СЕРВ СЕРВИСНАЯ И НАХОДИТСЯ В  services.js
 
     // Ф-я которая будет постить данные с событием 'submit - отправить'
     function bindPostData(form) {
@@ -62,6 +64,7 @@ function forms() {
             // Создаем объект, который будет формировать все заполненые данные с формы
             // Ключ - значение. Принимает в себя аргумент функции postData()
             // Главное чтобы отправка сработала нужно в inline input в htlm указать атрибут name="something"
+            // Name будет в базе данных как пункт типа тел имя и тд ВОТ ЗАЧЕМ
             const formData = new FormData(form);
 
             // Тут мы должны превратить  formData в JSON формат, чего напрямую сделать не можем, его нужно "пересоздать"
@@ -71,6 +74,7 @@ function forms() {
             // Этот объект приет ф-я postData в кач-ве аргумента
             const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
+            // Ф-я постинга данных
             postData('http://localhost:3000/requests', json)
             // Убрали трансформацию JSON в объект тк функция это уже сделала
             // И в data получаем уже обычный объект 
@@ -98,9 +102,11 @@ function forms() {
 
         // Скрывем блок отправки данных добавив класс
         prevModalDialog.classList.add('hide');
-        // Теперь мы вызываем структуру модального окна
+
+        // Теперь мы вызываем структуру модального окна но скрыв форму с заполнением
+        // в openModal() как всегда идет класс и таймер сброса
         // И формируем внутри структуру с благодарностью после отправки данных
-        openModal();
+        openModal('.modal', modalTimerId);
 
         // Сама структура и ее содержание
         const thanksModal = document.createElement('div');
@@ -121,9 +127,11 @@ function forms() {
             thanksModal.remove();
             prevModalDialog.classList.add('show');
             prevModalDialog.classList.remove('hide');
-            closeModal();
+
+            // Аргкмент о котором было ранее сказано
+            closeModal('.modal');
         }, 4000);
     }
 }
 
-module.exports = forms;
+export default forms;

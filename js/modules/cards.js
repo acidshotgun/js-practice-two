@@ -1,3 +1,6 @@
+// Импорт ф-и получения данных с сервера
+import { getResource } from "../services/services";
+
 function cards() {
     // Classes for tabs
     // Идея - шаблонизировать карточки и создавать их передвая нужные аргументы
@@ -57,45 +60,32 @@ function cards() {
         }
     }
 
-    // Создаем функцию которая будет получать с сервера данные для создания карточек
-    const getResource = async (url) => {
-        const res = await fetch(url);
-
-        // Поскольку fetch() не обрабатывает ошибки кроме 404 он не активирует catch, поэтому их надо прописать самим
-        // ok - Этот сатус как 200
-        // Если статус не ок, то выкинем ошибку (throw) и пояснение что за ошибка
-        // Создается как объект new и теперь можем получить url и статус ошибки
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status ${res.status}`);
-        }
-
-        return await res.json();
-    };
+    // Ф-Я ПОЛУЧЕНИЯ ДАННЫХ С СЕРВЕРА СЕРВИСРНАЯ И НАХОДИТСЯ В services.js
 
     // Вызываем функцию, где аргументом будет ссылка на массив с карточками в базе данных
-    // getResource('http://localhost:3000/menu')
-    // // Обрабатываем полож исход
-    // .then(data => {
-    //     // Тк в бд это массив беребираем его. Аргумент это объекты в массиве (деструктуризация)
-    //     // И на их основе создается новый объект от класса с аргументами
-    //     // Затем render() будет генерировать верстку табов на сайте
-    //     data.forEach(({img, altimg, title, descr, price}) => {
-    //         new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
-    //     });
-    // });
-
-
-    // Вариант создания с помощью axios
-    axios.get('http://localhost:3000/menu')
+    getResource('http://localhost:3000/menu')
+    // Обрабатываем полож исход
     .then(data => {
-        data.data.forEach(({img, altimg, title, descr, price}) => {
+        // Тк в бд это массив беребираем его. Аргумент это объекты в массиве (деструктуризация)
+        // И на их основе создается новый объект от класса с аргументами
+        // Затем render() будет генерировать верстку табов на сайте
+        data.forEach(({img, altimg, title, descr, price}) => {
             new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
         });
     });
+
+
+    // // Вариант создания с помощью axios
+    // axios.get('http://localhost:3000/menu')
+    // .then(data => {
+    //     data.data.forEach(({img, altimg, title, descr, price}) => {
+    //         new MenuCard(img, altimg, title, descr, price, '.menu .container', 'menu__item').render();
+    //     });
+    // });
     
 
     // Этот подход избавил нас от создания этих карточек тут вручную
     // И теперь они создлаются на основании данных с базы данных
 }
 
-module.exports = cards;
+export default cards;

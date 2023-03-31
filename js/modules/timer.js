@@ -1,8 +1,10 @@
-function timer() {
+// Передаем в ф-ю id - это селектор таймера (класс)
+// А в дедлайн окончание акции последняя точка
+// Теперь переменная дедлайн не нужна тк мы время передаем из главного файла
+
+function timer(id, deadline) {
     
     // Timer
-
-    const deadline = '2023-04-11'; // - это дедлайн
 
     // Это ф-я которая будет получать и обрабатывать разницу между дедлайном и нынешней датой
     function getTimeRemaining(endtime) {
@@ -74,7 +76,9 @@ function timer() {
         }
     }
     
-    setClock('.timer', deadline);
+    // В id передается селектор таймера
+    // А в дедлайн дата окончания акции тип
+    setClock(id, deadline);
 }
 
-module.exports = timer;
+export default timer;

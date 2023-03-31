@@ -1,3 +1,5 @@
+// Делаем модуль
+
 function calc() {
 
     // Calc
@@ -171,4 +173,5 @@ function calc() {
     getDynamicInformation('#age');
 }
 
-module.exports = calc;
+// Экспорт модуля по дефолту чтобы вызвать в гл файле сразу
+export default calc;
